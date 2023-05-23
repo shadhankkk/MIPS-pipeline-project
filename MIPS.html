@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MIPS Pipline Visualizer</title>
+
+    <link rel="icon" href="logo.jfif">
+
+    <link rel = "stylesheet" href = "MIPS.css">
+
+  </head>
+
+  <body>
+
+    <div class = "header">
+      <image class='logo' src="logo.jfif"></image>
+      <h1 id = "title" >MIPS Pipeline Visualizer</h1>
+      <a href="MIPSFAQ/MIPSFAQ.html" id ='FAQ'>FAQ</a>
+    </div>
+
+    <div class = "input-container">
+
+      <div id = "var-inputs"></div>
+    </div>
+
+    <div id = "var-outputs">
+      
+    </div>
+
+    <div class = "conversion-form">
+
+      <div class = "mips-input-box">
+        <textarea id = "mips-input" wrap = off></textarea>
+      </div>
+
+      
+
+      <div class = "convert-button-div">
+        <button id = "convert-button">
+          <img id = "arrow-icon" src = "right-arrow-icon.png">
+        </button>
+      </div>
+
+      
+
+      <div class = "pipeline-output-box">
+        <div id = "pipeline-output"></div>
+      </div>
+    </div>
+
+    <div class = "info" style = "text-align: center;">
+      <div id = "info-paragraph">
+        Enter your MIPS code on the left box and then click the button 
+        in the middle, the visualization of the pipeline will be 
+        generated on the right.
+        <div style = "color: green; font-size: 14px; margin-top: 5px">
+          Supported operations: 'add', 'and', 'nor', 'or', 'slt', 'sll', 'srl', 'sub', 'addi', 'andi', 'beq', 'bne', 'lui', 'lw', 'ori', 'slti', 'sw', 'j'
+        </div>
+        <div style = "color: red; font-size: 20px; margin-top: 5px;">IMPORTANT: Please read the FAQ before using. <br>If you want to report any errors/bugs or want to give any suggestions, please email me at e1086917@u.nus.edu. Thank you.</div>
+      </div>
+    </div>
+
+  </body>
+
+  <script src = "MIPS.js"></script>
+</html>

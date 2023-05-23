@@ -1,0 +1,47 @@
+FAQ:
+
+- I cannot 100% guarantee that this program will work, if you encounter any bugs,
+  please Email me at e1086917@u.nus.edu - i will try my best to resolve it ASAP.
+  Consequently, you probably shouldn't take the results of these at face-value,
+  it should be used as a supplement to your education.
+
+- This code is mostly targetted at students of CS2100 from NUS,
+  as most of my knowledge of MIPS comes from CS2100 and it also
+  inspired me to do this project.
+
+- Currently, the program assumes that your code compiles.
+  I aim to add features to detect compilation errors in the future.
+  (Although obviously, the program wont work if your code doesnt compile)
+
+- While technically the main purpose of this program is to visualize the pipelining process in MIPS,
+  I have also implemented a simulator for the MIPS code - the second row of boxes that is generated
+  upon clicking the arrow button in the middle shows the outputs.
+
+- if your MIPS code involves arrays, you may notice that some of the outputs take the form 
+  'Mem Location' - this is because I had to create my own memory management system for the
+  MIPS simulator. You may ignore this - but if you are interested, Mem Location x refers to
+  the x-th element that was declared (under .data) AND is part of an array.
+
+- if you intend to use some register, let's say $s0, to refer to the base-address
+  of some array, A, of length n - then you must initialize that array under .data as A: .word A[0], A[1],..., A[n-1]
+
+- currently no support for .globl
+
+- as of now - supported instructions are: 
+    'add', 'and', 'nor', 'or', 'slt', 'sll', 'srl', 'sub', 'addi', 
+    'andi', 'beq', 'bne', 'lui', 'lw', 'ori', 'slti', 'sw', 'j' 
+  i will add more overtime
+
+- for declarations under .data - only .word is supported,
+  so if you have some declaration such as pi: .float 3.14159 - it is not possible.
+  i aim to add this functionality soon.
+
+- all register values start off with a value of 0 by default, if you want the program to start with another
+  defined value for some register, you can do so by key-ing it in inside the respective input box that is auto-generated
+  after you key in your MIPS program
+
+- If you are interested to know how i performed Delayed Branching,
+  I simulated the MIPS code and kept track of the executed instructions,
+  then I modelled each instruction as a node and created a Directed Acylic Graph
+  where connected-nodes have a RAW dependency - and then ran a topological sort 
+  on it and created a total-o
