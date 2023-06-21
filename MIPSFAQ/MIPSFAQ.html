@@ -2,13 +2,16 @@
 <html>
 
   <head>
+    <meta name="viewport" content="width=640, initial-scale=.5, user-scalable=no" />
     <link rel="icon" href="../logo.jfif">
     <link rel = "stylesheet" href = "MIPSFAQ.css">
-    <title>FAQ</title>
+    <title>MIPS Pipeline Visualizer: FYI</title>
   </head>
   
   <body>
-    <h2 class = "header">FAQ</h2>
+   
+    <h2 class = "header"><a id = 'back-anchor' href="../MIPS.html">MIPS Pipeline Visualizer</a> FYI</h2>
+  
     <div class = 'faq'>
       <p>
         - I cannot 100% guarantee that this program will work, if you encounter any bugs,
@@ -16,63 +19,65 @@
           <span style='color:rgb(255, 0, 0)'>Consequently</span>, you probably shouldn't take the results of these at face-value,
           it should be used as a supplement to your education.
       </p>
-
+      <hr style="width:80%;">
       <p>
-        - This code is mostly targetted at students of <span style='color:rgb(255, 0, 0)'>CS2100</span> from NUS,
+        - This program was made with the <span style='color:rgb(255, 0, 0)'>CS2100</span> module from NUS in mind,
           as most of my knowledge of <span style='color:rgb(255, 0, 0)'>MIPS</span> comes from <span style='color:rgb(255, 0, 0)'>CS2100</span> and it also
           inspired me to do this project.
       </p>
-
+      <hr style="width:80%;">
       <p>
         - Currently, the program assumes that your code <span style='color:rgb(255, 0, 0)'>compiles</span>.
           I aim to add features to detect compilation errors in the future.
-          (Although obviously, the program wont work if your code doesnt compile)
       </p>
-
+      <hr style="width:80%;">
       <p>
         - While technically the main purpose of this program is to <span style='color:rgb(255, 0, 0)'>visualize the pipelining process</span> in MIPS,
           I have also implemented a <span style='color:rgb(255, 0, 0)'>MIPS simulator</span> - the second row of boxes that is generated
-          upon <span style='color:rgb(255, 0, 0)'>clicking</span> the arrow button in the middle shows the outputs.
+          upon <span style='color:rgb(255, 0, 0)'>clicking</span> the arrow button in the middle shows the outputs. (This was neccessary to
+          determine the result of branch instructions)
       </p>
-
+      <hr style="width:80%;">
       <p>
         - if your MIPS code involves <span style='color:rgb(255, 0, 0)'>arrays</span>, you may notice that some of the outputs take the form 
         <span style='color:rgb(255, 0, 0)'>'Mem Location'</span> - this is because I had to create my own memory management system for the
           MIPS simulator. You may <span style='color:rgb(255, 0, 0)'>ignore</span> this - but if you are interested, Mem Location x refers to
           the x-th element that was declared (under .data) AND is part of an array.
       </p>
-
+      <hr style="width:80%;">
       <p>
         - if you intend to use some register, let's say $s0, to refer to the base-address
           of some array, A, of length n - then you must initialize that array under .data as
           A: .word <span style='color:rgb(247, 0, 0)'>A[0], A[1],..., A[n-1]</span> - and then
           add the instruction 'lw $s0, A' into your .text segment
       </p>
-
+      <hr style="width:80%;">
       <p>
         - currently <span style='color:rgb(255, 0, 0)'>no support for .globl</span>
       </p>
-
+      <hr style="width:80%;">
       <p>
         - as of now - supported instructions are:
         <span style='color:rgb(60, 255, 0)'>
             'add', 'and', 'nor', 'or', 'slt', 'sll', 'srl', 'sub', 'addi', 
             'andi', 'beq', 'bne', 'lui', 'lw', 'ori', 'slti', 'sw', 'j'
         </span>
-          i will add more overtime
+        <br>
+          - I will add more overtime
       </p>
-
+      <hr style="width:80%;">
       <p>
         - for declarations under .data - <span style='color:rgb(255, 0, 0)'>only .word is supported</span>,
-          so if you have some declaration such as pi: .float 3.14159 - it is <span style='color:rgb(255, 0, 0)'>not</span> possible.
-          i aim to add this functionality soon.
+          so if you have a declaration such as pi: .float 3.14159 - it is <span style='color:rgb(255, 0, 0)'>not</span> supported.
+          <br>I aim to add this functionality soon.
       </p>
-
+      <hr style="width:80%;">
       <p>
         - all register values start off with a value of <span style='color:rgb(255, 0, 0)'>0 by default</span>, if you want the program to start with another
           defined value for some register, you can do so by keying it in inside the respective input box that is auto-generated
           <span style='color:rgb(255, 0, 0)'>after</span> you key in your MIPS program
       </p>
+      
     </div>
   </body>
 

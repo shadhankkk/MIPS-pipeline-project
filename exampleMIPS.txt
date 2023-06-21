@@ -1,0 +1,36 @@
+.data
+ A: .word 1,2,3,4,5,6,7,8
+ B: .word 101,102,103,104
+ C: .word 201,202,203,204
+.text
+# $s0 = base address of array A
+# $s1 = base address of array B
+# $s2 = base address of array C
+lw $s0, A
+lw $s1, B
+lw $s2, C
+
+# $s3 = n, the number of elements in array B
+addi $s3, $0, 4
+
+add $t0, $s0, $0 # Inst1, Address: 0x00FFFF18
+add $t1, $s1, $0 # Inst2
+add $t2, $s2, $0 # Inst3
+add $t3, $s3, $s3 # Inst4: $t3 = 2n
+add $t4, $0, $0 # Inst5: $t4 = k (loop variable)
+Loop: slt $t5, $t4, $t3 # Inst6: k < 2n?
+beq $t5, $0, End # Inst7
+lw $t6, 0($t0) # Inst8
+lw $t7, 0($t1) # Inst9
+add $t6, $t6, $t7 # Inst10
+sw $t6, 0($t0) # Inst11
+lw $t8, 4($t0) # Inst12
+lw $t9, 0($t2) # Inst13
+add $t8, $t8, $t9 # Inst14
+sw $t8, 4($t0) # Inst15
+addi $t0, $t0, 8 # Inst16
+addi $t1, $t1, 4 # Inst17
+addi $t2, $t2, 4 # Inst18
+addi $t4, $t4, 2 # Inst19
+j Loop # Inst20
+End:

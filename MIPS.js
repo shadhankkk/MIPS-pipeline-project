@@ -3,10 +3,16 @@ const inputElem = document.getElementById("mips-input");
 let inputString = inputElem.value;
 let labels = {};
 let labelSet = new Set();
+let arrayDict = {};
 let instrSeq = [];
 let memorySim = {};
 let preProcDir = -1;
-
+let forwarding = false;
+let earlyBranching = false;
+let branchPrediction = false;
+let branchPredictionTaken = false;
+let branchPredictionNotTaken = false;
+let delayedBranching = false;
 
 // MIPS INSTR TYPES
 
@@ -61,6 +67,7 @@ function initialize() {
   var_output_elem.innerHTML = '';
   labels = {};
   labelSet = new Set();
+  arrayDict = {};
   instrSeq = [];
   preProcDir = -1;
   processedInstructions = getInputArray().map(input => inputToComponents(input));
@@ -166,29 +173,56 @@ convertButtonElem.onclick = () => {
     }
   }
   delete varValueDict['$0'];
+
+  // for(arrKey in arrayDict) {
+  //   let outputMsg = `Mem Location: ${arrayDict[arrKey][0]}, Length: ${arrayDict[arrKey][1]}`
+  //   var_output_elem.insertAdjacentHTML('beforeend', 
+  //                                      `<div class = "one-var-output"> 
+  //                                          <div class = "var-label">${arrKey}:</div> 
+  //                                          <div id = 'var-output-${arrKey}' class = 'var-output-box'>${outputMsg}</div>
+  //                                        </div>`);
+  // }
+
   for (key in varValueDict) {
     if(typeof labels[key] == 'string' && labels[key].substring(0,3) == '.ML') {
       continue;
     }
+    let outputMsg;
     if(typeof varValueDict[key] == 'string' && varValueDict[key].substring(0,3) == '.ML') {
+      let memPos = varValueDict[key].substring(3);
+      let arrLabel;
+      let arrPos;
+      for(arrKey in arrayDict) {
+        let baseMem = arrayDict[arrKey][0];
+        let len = arrayDict[arrKey][1];
+        if(memPos >= baseMem && memPos < baseMem + len) {
+          arrLabel = arrKey;
+          arrPos = memPos - baseMem;
+          break;
+        }
+      }
     
-    var_output_elem.insertAdjacentHTML('beforeend', 
-                                       `<div class = "one-var-output"> 
-                                          <div class = "var-label">${key}:</div> 
-                                          <div id = 'var-output-${key}' class = 'var-output-box'>${'Mem Location: ' + String(varValueDict[key].substr(3))}</div>
-                                        </div>`);
+      if(arrLabel == undefined || arrPos == undefined) {
+        outputMsg = `Mem Location: ${varValueDict[key].substring(3)}`
+      } else {
+        outputMsg = '&' + arrLabel + '[' + arrPos + ']';
+      }
     } else {
-      var_output_elem.insertAdjacentHTML('beforeend', 
-                                       `<div class = "one-var-output"> 
-                                          <div class = "var-label">${key}:</div> 
-                                          <output id = 'var-output-${key}' class = 'var-output-box'>${varValueDict[key]}</output>
-                                        </div>`);
+      outputMsg = varValueDict[key];
     }
+    var_output_elem.insertAdjacentHTML('beforeend', 
+                                        `<div class = "one-var-output"> 
+                                            <div class = "var-label">${key}:</div> 
+                                            <div id = 'var-output-${key}' class = 'var-output-box'>${outputMsg}</div>
+                                          </div>`);
   }
   console.log(varValueDict);
   console.log("MEMORYSIM", memorySim);
   currInstr = 0;
   console.log(instrSeq);
+  console.log("ARRAY DICT", arrayDict);
+
+  startPipeline();
 }
 
 function getInputArray() {
@@ -277,7 +311,7 @@ function addPreProcVars() {
                 let LvRa = instr.split(':')
                 let varName = LvRa[0].trim();
                 //Lt because type defined on left e.g .word 
-                let LtRa = LvRa[1].trim().replace(' ', 'pleaseDontHaveThisInYourInstruction').split('pleaseDontHaveThisInYourInstruction');
+                let LtRa = LvRa[1].trim().replace(' ', 'pleaseDontHaveThisInYourInstruction@monkey123').split('pleaseDontHaveThisInYourInstruction@monkey123');
                 let type = LtRa[0].trim();
                 let assignment = LtRa[1].trim();
                 
@@ -287,6 +321,7 @@ function addPreProcVars() {
                 if (type == '.word') {
                   let arr = assignment.split(',');
                   let arrLen = arr.length;
+                  arrayDict[varName] = [currMem, arr.length];
                   if(arrLen == 1) {
                      varValueDict[varName] = Number(assignment);
                   } else {
@@ -555,4 +590,78 @@ JtypeDict = {'j' : j};
 function j(instr) {
   let instrToJumpTo = Number(labels[instr[1]]);
   currInstr = instrToJumpTo - 1;
+}
+
+// START OF PIPELINING PROCESS
+
+class InstrNode {
+  InstrNode(instrNum, edges=[]) {
+    this.instrNum = instrNum;
+    this.edges = edges;
+    this.delay = 0;
+  }
+
+  addEdge(edge) {
+    this.edges.push(edge);
+  }
+
+  setDelay(delay) {
+    this.delay = delay;
+  }
+}
+
+class Edge {
+  Edge(fromNode, toNode) {
+    this.fromNode = fromNode;
+    this.toNode = toNode;
+  }
+}
+
+let instrNodes = {};
+
+function startPipeline() {
+  let instrSeqSet = new Set();
+  let instrSeqNoDupe = [];
+  instrSeq.forEach(instr => {
+                    if(instrSeqSet.has(instr)) {
+                      return;
+                    }
+                    instrSeqSet.add(instr);
+                    instrSeqNoDupe.push(instr);
+                  })
+  generateNodes(instrSeqNoDupe);
+}
+
+function generateNodes(instrArr) {
+  for(instr of instrArr) {
+    let instrNode = new InstrNode(instr);
+    instrNodes[instr] = instrNode;
+  }
+  addDependencies();
+}
+
+function addDependencies() {
+  console.log(instrNodes);
+  let instrNums = Object.keys(instrNodes);
+  let len = instrNums.length;
+
+  for(let i = 0; i < len; i++) {
+    for(let j = i + 1; j < i + 3 && j < len; j++) {
+      if(hasDependency(processedInstructions[instrNums[j]],
+                       processedInstructions[instrNums[i]])) {
+        console.log(processedInstructions[instrNums[i]], 
+                    processedInstructions[instrNums[j]]);
+        
+        let currDelay = instrNodes[instrNums[j]].delay;
+        instrNodes[instrNums[j]].setDelay(Math.min(currDelay, ))
+
+      }
+    }
+  }
+}
+
+function hasDependency(nextInstr, currInstr) {
+  let nextInstrLen = nextInstr.length;
+  let currInstrLen = currInstr.length;
+  return nextInstr.slice(2,nextInstrLen + 1).includes(currInstr[1]);
 }

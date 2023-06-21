@@ -6,15 +6,13 @@
     <link rel="icon" href="logo.jfif">
 
     <link rel = "stylesheet" href = "MIPS.css">
-
   </head>
 
   <body>
-
     <div class = "header">
       <image class='logo' src="logo.jfif"></image>
       <h1 id = "title" >MIPS Pipeline Visualizer</h1>
-      <a href="MIPSFAQ/MIPSFAQ.html" id ='FAQ'>FAQ</a>
+      <a href="MIPSFAQ/MIPSFAQ.html" id ='FAQ'>FYI</a>
     </div>
 
     <div class = "input-container">
@@ -29,6 +27,50 @@
     <div class = "conversion-form">
 
       <div class = "mips-input-box">
+        <div class = "pipeline-config-box">
+          <div id = 'config-select-box'>
+            <label id = 'pipeline-config-label' for="forward-select"> Forwarding:</label>
+              <br>
+            <input id="forward-select" type="radio" name = 'fowarding' >
+            <label for="forward-select">Yes</label>
+              <br>
+            <input id="forward-unselect" type="radio" name = 'fowarding'>
+            <label for="forward-unselect">No</label>
+          </div>
+
+          <div id = 'config-select-box'>
+            <label id = 'pipeline-config-label' for="early-branch-select"> Early Branching:</label>
+              <br>
+            <input id="early-branch-select" type="radio" name = 'early-branch' >
+            <label for="early-branch-select">Yes (ID Stage)</label>
+              <br>
+            <input id="early-branch-unselect" type="radio" name = 'early-branch'>
+            <label for="early-branch-unselect">No</label>
+          </div>
+
+          <div id = 'config-select-box'>
+            <label id = 'pipeline-config-label' for="branch-prediction-select"> Branch Prediction:</label>
+              <br>
+            <input id="branch-taken-select" type="radio" name = 'branch-prediction'>
+            <label for="branch-taken-select">Taken</label>
+              <br>
+            <input id="branch-not-taken-select" type="radio" name = 'branch-prediction'>
+            <label for="branch-not-taken-select">Not Taken</label>
+              <br>
+            <input id="no-branch-prediction-select" type="radio" name = 'branch-prediction'>
+            <label for="no-branch-prediction-select">None</label>
+          </div>
+
+          <div id = 'config-select-box'>
+            <label id = 'pipeline-config-label' for="delayed-branching-select"> Delayed Branching:</label>
+              <br>
+            <input id="delayed-branching-select" type="radio" name = 'delayed-branching' >
+            <label for="delayed-branching-select">Yes</label>
+              <br>
+            <input id="delayed-branching-unselect" type="radio" name = 'delayed-branching'>
+            <label for="delayed-branching-unselect">No</label>
+          </div>
+        </div>
         <textarea id = "mips-input" wrap = off></textarea>
       </div>
 
@@ -52,10 +94,7 @@
         Enter your MIPS code on the left box and then click the button 
         in the middle, the visualization of the pipeline will be 
         generated on the right.
-        <div style = "color: green; font-size: 14px; margin-top: 5px">
-          Supported operations: 'add', 'and', 'nor', 'or', 'slt', 'sll', 'srl', 'sub', 'addi', 'andi', 'beq', 'bne', 'lui', 'lw', 'ori', 'slti', 'sw', 'j'
-        </div>
-        <div style = "color: red; font-size: 20px; margin-top: 5px;">IMPORTANT: Please read the FAQ before using. <br>If you want to report any errors/bugs or want to give any suggestions, please email me at e1086917@u.nus.edu. Thank you.</div>
+        <div style = "color: red; font-size: 20px; margin-top: 5px;">IMPORTANT: Please read the FYI before using. <br>If you want to report any errors/bugs or want to give any suggestions, please email me at e1086917@u.nus.edu. Thank you.</div>
       </div>
     </div>
 
