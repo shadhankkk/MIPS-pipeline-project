@@ -1,5 +1,6 @@
 // the text area for input
 const inputElem = document.getElementById("mips-input");
+let pipelineOutputElem = document.getElementById('pipeline-output');
 let inputString = inputElem.value;
 let labels = {};
 let labelSet = new Set();
@@ -7,11 +8,11 @@ let arrayDict = {};
 let instrSeq = [];
 let memorySim = {};
 let preProcDir = -1;
-let forwarding = false;
-let earlyBranching = false;
-let branchPrediction = false;
-let branchPredictionTaken = false;
-let branchPredictionNotTaken = false;
+
+let forwarding = document.getElementById('forward-select').checked;
+let earlyBranching = document.getElementById('early-branch-select').checked;
+let branchPredictionTaken = document.getElementById('branch-taken-select').checked;
+let branchPredictionNotTaken = document.getElementById('branch-not-taken-select').checked;
 let delayedBranching = false;
 
 // MIPS INSTR TYPES
@@ -64,6 +65,11 @@ for (key of Object.keys(varValueDict)) {
 let currInstr = 0;
 
 function initialize() {
+  forwarding = document.getElementById('forward-select').checked;
+  earlyBranching = document.getElementById('early-branch-select').checked;
+  branchPredictionTaken = document.getElementById('branch-taken-select').checked;
+  branchPredictionNotTaken = document.getElementById('branch-not-taken-select').checked;
+  pipelineOutputElem.innerHTML = "<div id = 'ppl-output-placeholder'></div>";
   var_output_elem.innerHTML = '';
   labels = {};
   labelSet = new Set();
@@ -112,6 +118,11 @@ function initialize() {
 inputElem.addEventListener('blur', initialize);
 
 convertButtonElem.onclick = () => {
+  forwarding = document.getElementById('forward-select').checked;
+  earlyBranching = document.getElementById('early-branch-select').checked;
+  branchPredictionTaken = document.getElementById('branch-taken-select').checked;
+  branchPredictionNotTaken = document.getElementById('branch-not-taken-select').checked;
+  pipelineOutputElem.innerHTML = "<div id = 'ppl-output-placeholder'></div>";
   var_output_elem.innerHTML = '';
   addPreProcVars();
   console.log(varValueDict);
@@ -167,7 +178,7 @@ convertButtonElem.onclick = () => {
     console.log(currInstr);
     console.log(currInstr, varValueDict);
     executions++;
-    if(executions > 10000) {
+    if(executions > 200) {
       console.log("max executions hit");
       break;
     }
@@ -223,6 +234,7 @@ convertButtonElem.onclick = () => {
   console.log("ARRAY DICT", arrayDict);
 
   startPipeline();
+  createPipeline();
 }
 
 function getInputArray() {
@@ -305,12 +317,13 @@ function addPreProcVars() {
     let currMem = 0;
 
     preProcDir.split('\n')
-              .filter(x => x != '.data' && x.trim() != '')
+              .filter(x => x.trim() != '.data' && x.trim() != '')
               .map(instr => {
                 //LvRa : Lv denotes variable name defined on left and Ra refers to the assignment to that variable coming in from the right
                 let LvRa = instr.split(':')
                 let varName = LvRa[0].trim();
                 //Lt because type defined on left e.g .word 
+                console.log(LvRa);
                 let LtRa = LvRa[1].trim().replace(' ', 'pleaseDontHaveThisInYourInstruction@monkey123').split('pleaseDontHaveThisInYourInstruction@monkey123');
                 let type = LtRa[0].trim();
                 let assignment = LtRa[1].trim();
@@ -322,16 +335,14 @@ function addPreProcVars() {
                   let arr = assignment.split(',');
                   let arrLen = arr.length;
                   arrayDict[varName] = [currMem, arr.length];
-                  if(arrLen == 1) {
-                     varValueDict[varName] = Number(assignment);
-                  } else {
+                  
                     varValueDict[varName] = `.ML${currMem}`;
                     for (val of arr) {
                       memorySim[currMem] = Number(val.trim());
                       currMem++;
                     }
                     console.log(memorySim);
-                  }
+                  
 
                   if(!(temp.hasOwnProperty(varName))) {
                     temp[varName] = 'undef';
@@ -574,6 +585,7 @@ function sw(instr) {
     let rt = instr[1];
     let rs = instr[2];
     let immd = Number(instr[3]);
+    console.log(instr);
     memorySim[(Number(varValueDict[rs].slice(3)) + immd / 4)] = varValueDict[rt];
   } else {
     let rt = instr[1];
@@ -608,6 +620,14 @@ class InstrNode {
   setDelay(delay) {
     this.delay = delay;
   }
+
+  addDelay(extraDelay) {
+    this.delay += extraDelay;
+  }
+
+  getDelay() {
+    return this.delay;
+  }
 }
 
 class Edge {
@@ -622,6 +642,7 @@ let instrNodes = {};
 function startPipeline() {
   let instrSeqSet = new Set();
   let instrSeqNoDupe = [];
+  let temp = instrSeq;
   instrSeq.forEach(instr => {
                     if(instrSeqSet.has(instr)) {
                       return;
@@ -629,6 +650,7 @@ function startPipeline() {
                     instrSeqSet.add(instr);
                     instrSeqNoDupe.push(instr);
                   })
+  instrSeq = temp;
   generateNodes(instrSeqNoDupe);
 }
 
@@ -637,31 +659,172 @@ function generateNodes(instrArr) {
     let instrNode = new InstrNode(instr);
     instrNodes[instr] = instrNode;
   }
-  addDependencies();
+  //  addDependencies();
 }
 
-function addDependencies() {
-  console.log(instrNodes);
-  let instrNums = Object.keys(instrNodes);
-  let len = instrNums.length;
+// function addDependencies() {
+//   console.log(instrNodes);
+//   let instrNums = Object.keys(instrNodes);
+//   let len = instrNums.length;
 
-  for(let i = 0; i < len; i++) {
-    for(let j = i + 1; j < i + 3 && j < len; j++) {
-      if(hasDependency(processedInstructions[instrNums[j]],
-                       processedInstructions[instrNums[i]])) {
-        console.log(processedInstructions[instrNums[i]], 
-                    processedInstructions[instrNums[j]]);
+//   for(let i = 0; i < len; i++) {
+//     for(let j = i + 1; j < i + 3 && j < len; j++) {
+//       if(hasDependency(processedInstructions[instrNums[j]],
+//                        processedInstructions[instrNums[i]])) {
+//         console.log(processedInstructions[instrNums[i]], 
+//                     processedInstructions[instrNums[j]]);
         
-        let currDelay = instrNodes[instrNums[j]].delay;
-        instrNodes[instrNums[j]].setDelay(Math.min(currDelay, ))
+//         let currDelay = instrNodes[instrNums[j]].delay;
+//         instrNodes[instrNums[j]].setDelay(Math.min(currDelay, ))
 
+//       }
+//     }
+//   }
+// }
+
+// function hasDependency(nextInstr, currInstr) {
+//   let nextInstrLen = nextInstr.length;
+//   let currInstrLen = currInstr.length;
+//   return nextInstr.slice(2,nextInstrLen + 1).includes(currInstr[1]);
+// }
+
+function createPipeline() {
+  console.log(processedInstructions);
+  let instrSeqLen = instrSeq.length;
+  let processingVars = {};
+  let currDelay = -200;
+
+  for(let i = 0; i < instrSeqLen; i++) {
+    currDelay += 200;
+    for(key in processingVars) {
+      processingVars[key] = [processingVars[key][0], processingVars[key][1] + 1];
+    }
+
+    let instr = processedInstructions[instrSeq[i]];
+    let writingTo = instr[1];
+
+    if(instr[0] == 'beq' || instr[0] == 'bne') {
+
+    } else if (instr[0] == 'lw') {
+      if(processingVars.hasOwnProperty(instr[2])) {
+        if(isFinishedProcessing(processingVars[instr[2]])) {
+          delete processingVars[instr[2]];
+        } else {
+          i--;
+          continue;
+        }
+      }
+    } else if (instr[0] == 'sw') {
+      if(processingVars.hasOwnProperty(instr[1])) {
+        if(isFinishedProcessing(processingVars[instr[1]])) {
+          delete processingVars[instr[1]];
+        } else {
+          i--;
+          continue;
+        }
+      }
+    } else if (instr[0] == 'j') {
+      // no delays
+    } else {
+
+      if(processingVars.hasOwnProperty(instr[2]) && processingVars.hasOwnProperty(instr[3])) {
+        if(isFinishedProcessing(processingVars[instr[2]]) 
+            && isFinishedProcessing(processingVars[instr[3]])) {
+          delete processingVars[instr[2]];
+          delete processingVars[instr[3]];
+        } else {
+          i--;
+          continue;
+        }
+      } else if (processingVars.hasOwnProperty(instr[2])) {
+        if(isFinishedProcessing(processingVars[instr[2]])) {
+          delete processingVars[instr[2]];
+        } else {
+          i--;
+          continue;
+        }
+      } else if (isFinishedProcessing(processingVars.hasOwnProperty(instr[3]))) {
+        if(processingVars[instr[3]] >= 3) {
+          delete processingVars[instr[3]];
+        } else {
+          i--;
+          continue;
+        }
       }
     }
+
+    pipelineOutputElem.innerHTML += `<div><img src='instrStages.png' style='transform: translateX(${currDelay}px)'></div>`;
+    
+    if(instr[0] == 'bne' || instr[0] == 'beq') {
+      if(branchPredictionNotTaken) {
+        let isNotTaken = (instrSeq[i+1] == instrSeq[i] + 1);
+        if(!isNotTaken) {
+          if(earlyBranching) {
+            pipelineOutputElem.innerHTML += `<div><img src='flushedInstrStages.png' style='transform: translateX(${currDelay + 200}px)'></div>`;
+            currDelay += 200;
+          } else {
+            pipelineOutputElem.innerHTML += `<div><img src='flushedInstrStages.png' style='transform: translateX(${currDelay + 200}px)'></div>`;
+            pipelineOutputElem.innerHTML += `<div><img src='flushedInstrStages.png' style='transform: translateX(${currDelay + 400}px)'></div>`;
+            pipelineOutputElem.innerHTML += `<div><img src='flushedInstrStages.png' style='transform: translateX(${currDelay + 600}px)'></div>`;
+            currDelay += 600;
+          }
+        }
+      } else if (branchPredictionTaken) {
+        let isTaken = (instrSeq[i+1] == Number(labels[instr[3]]));
+        if(!isTaken) {
+          if(earlyBranching) {
+            if(processedInstructions[Number(labels[instr[3]])] != undefined) {
+              pipelineOutputElem.innerHTML += `<div><img src='flushedInstrStages.png' style='transform: translateX(${currDelay + 200}px)'></div>`; 
+            }
+            currDelay += 200;
+          } else {
+            if(processedInstructions[Number(labels[instr[3]])] != undefined) {
+              pipelineOutputElem.innerHTML += `<div><img src='flushedInstrStages.png' style='transform: translateX(${currDelay + 200}px)'></div>`; 
+            }
+
+            if(processedInstructions[Number(labels[instr[3]]) + 1] != undefined) {
+              pipelineOutputElem.innerHTML += `<div><img src='flushedInstrStages.png' style='transform: translateX(${currDelay + 400}px)'></div>`;
+            }
+
+            if(processedInstructions[Number(labels[instr[3]]) + 2] != undefined) {
+              pipelineOutputElem.innerHTML += `<div><img src='flushedInstrStages.png' style='transform: translateX(${currDelay + 600}px)'></div>`;
+            }
+            currDelay += 600;
+          }
+        }
+      } else {
+        if(earlyBranching) {
+          currDelay += 200;
+        } else {
+          currDelay += 600;
+        }
+      }
+    } else if (instr[0] == 'j') {
+      continue;
+    } else if (instr[0] == 'lw') {
+      processingVars[instr[1]] = [instr[0], 0];
+    } else if (instr[0] == 'sw') {
+      processingVars[instr[2]] = [instr[0], 0];
+    } else {
+      processingVars[instr[1]] = [instr[0], 0];
+    }
   }
+
 }
 
-function hasDependency(nextInstr, currInstr) {
-  let nextInstrLen = nextInstr.length;
-  let currInstrLen = currInstr.length;
-  return nextInstr.slice(2,nextInstrLen + 1).includes(currInstr[1]);
+function isFinishedProcessing(arr) {
+  
+  if (arr[0] == 'lw' || arr[0] == 'sw') {
+    if (forwarding) {
+      return arr[1] >= 2;
+    } else {
+      return arr[1] >= 3;
+    }
+  } else {
+    if (forwarding) {
+      return arr[1] >= 1;
+    } else {
+      return arr[1] >= 3;
+    }
+  }
 }

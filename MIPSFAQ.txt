@@ -39,9 +39,3 @@ FAQ:
 - all register values start off with a value of 0 by default, if you want the program to start with another
   defined value for some register, you can do so by key-ing it in inside the respective input box that is auto-generated
   after you key in your MIPS program
-
-- If you are interested to know how i performed Delayed Branching,
-  I simulated the MIPS code and kept track of the executed instructions,
-  then I modelled each instruction as a node and created a Directed Acylic Graph
-  where connected-nodes have a RAW dependency - and then ran a topological sort 
-  on it and created a total-o

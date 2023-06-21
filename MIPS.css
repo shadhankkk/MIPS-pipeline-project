@@ -11,7 +11,7 @@ input[type = 'radio'] {
   align-items: center;
 }
 
-@media (min-aspect-ratio: 4/3) {
+@media (max-aspect-ratio: 21/9) {
   body {
     transform: scale(0.67);
     transform-origin: top left;
@@ -83,13 +83,10 @@ input[type = 'radio'] {
   right: 0%;
   top: 0.1%;
   bottom: -5%;
-  border-top-left-radius: 25px;
-  border-bottom-left-radius: 25px;
   border-radius: 25px;
   color: rgb(180, 179, 179);
   font-size: 20px;
   overflow-wrap: break-word;
-  overflow-y:scroll;
   border-style: solid;
   border-color: darkgray;
   border-width: 3px;
@@ -168,6 +165,7 @@ input[type = 'radio'] {
 /* pipline-output-box edited along with mips-input-box */
 
 #pipeline-output {
+  resize: vertical;
   position: absolute;
   left: 0%;
   right: 10%;
@@ -180,6 +178,7 @@ input[type = 'radio'] {
   border-style: solid;
   border-color: darkgray;
   border-width: 3px;
+  overflow: auto;
 }
 
 .input-container {
