@@ -168,6 +168,7 @@ convertButtonElem.onclick = () => {
     }
   }
   varValueDict['$0'] = 0;
+  varValueDict['$zero'] = 0;
   let len = processedInstructions.length;
   let executions = 0;
   console.log(processedInstructions);
@@ -184,6 +185,7 @@ convertButtonElem.onclick = () => {
     }
   }
   delete varValueDict['$0'];
+  delete varValueDict['$zero'];
 
   // for(arrKey in arrayDict) {
   //   let outputMsg = `Mem Location: ${arrayDict[arrKey][0]}, Length: ${arrayDict[arrKey][1]}`
