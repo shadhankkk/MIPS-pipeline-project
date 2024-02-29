@@ -179,7 +179,7 @@ convertButtonElem.onclick = () => {
     console.log(currInstr);
     console.log(currInstr, varValueDict);
     executions++;
-    if(executions > 200) {
+    if(executions > 100000) {
       console.log("max executions hit");
       break;
     }
